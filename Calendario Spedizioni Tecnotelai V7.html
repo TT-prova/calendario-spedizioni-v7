@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Calendario Spedizioni Tecnotelai V7</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f3f4f6;color:#0f172a}
+    header{background:#0f172a;color:white;padding:18px 24px;display:flex;justify-content:space-between;align-items:center}
+    header h1{font-size:22px;margin:0}
+    header small{opacity:.85}
+    .wrap{max-width:1220px;margin:24px auto;padding:0 18px}
+    .card{background:white;border-radius:14px;padding:18px;box-shadow:0 4px 14px rgba(15,23,42,.08);margin-bottom:18px}
+    h2{margin:0 0 14px;font-size:20px}
+    h3{margin:0 0 10px;font-size:16px}
+    .row{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;align-items:end}
+    .row-program{display:grid;grid-template-columns:repeat(10,1fr);gap:8px;align-items:end}
+    label{display:block;font-size:12px;font-weight:700;margin-bottom:4px;color:#334155}
+    input,select,textarea{width:100%;border:1px solid #d1d5db;border-radius:8px;padding:8px;background:white;font-family:Arial,Helvetica,sans-serif}
+    input,select{height:38px}
+    textarea{min-height:78px;resize:vertical}
+    .checkgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;border:1px solid #d1d5db;border-radius:8px;padding:6px;background:white;min-height:38px}
+    .checkgrid label{display:flex;align-items:center;gap:4px;margin:0;font-weight:600;font-size:11px;color:#334155}
+    .checkgrid input{width:auto;height:auto;margin:0}
+    button{height:38px;border:none;border-radius:8px;padding:0 14px;font-weight:700;cursor:pointer}
+    .primary{background:#2563eb;color:white}
+    .secondary{background:#e5e7eb;color:#111827}
+    .danger{background:#ef4444;color:white}
+    .success{background:#16a34a;color:white}
+    .warning{background:#f59e0b;color:white}
+    .toolbar{display:flex;gap:8px;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+    .leftBtns,.filters{display:flex;gap:8px;align-items:center}
+    .filters select{width:190px}
+    .monthTitle{font-size:22px;font-weight:800}
+    .legend{display:flex;gap:12px;font-size:12px;margin-top:10px;flex-wrap:wrap}
+    .dot{display:inline-block;width:10px;height:10px;border-radius:99px;margin-right:4px}
+    .green{background:#dcfce7;border-left:5px solid #22c55e}
+    .yellow{background:#fef3c7;border-left:5px solid #f59e0b}
+    .orange{background:#ffedd5;border-left:5px solid #f97316}
+    .red{background:#fee2e2;border-left:5px solid #ef4444}
+    .purple{background:#ede9fe;border-left:5px solid #7c3aed}
+    .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+    .dow{font-weight:800;text-align:center;padding:10px;color:#334155}
+    .day{min-height:128px;background:white;border:1px solid #e5e7eb;border-radius:10px;padding:8px;overflow:auto}
+    .day.muted{background:#f8fafc;color:#94a3b8}
+    .daynum{font-weight:800;margin-bottom:6px}
+    .event{border-radius:8px;padding:7px;margin-bottom:6px;font-size:12px}
+    .event b{font-size:13px}
+    .event-actions{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+    .event-actions button{height:26px;font-size:11px;padding:0 8px}
+    .mini{font-size:11px;opacity:.85}
+    .orderlist{margin-top:6px;padding-left:18px;font-size:11px}
+    .orderlist li{margin-bottom:2px}
+    .event a{color:#1d4ed8;font-weight:700;text-decoration:none}
+    .wide2{grid-column:span 2}
+    .wide3{grid-column:span 3}
+    .hidden{display:none}
+    .statusbar{font-size:13px;color:#475569;margin-top:8px}
+    @media(max-width:1050px){
+      .row,.row-program{grid-template-columns:repeat(2,1fr)}
+      .calendar{grid-template-columns:1fr}
+      .dow{display:none}
+      .day{min-height:auto}
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Calendario Spedizioni Tecnotelai</h1>
+  <small>Mezzi nostri + ritiri + link PDF + ordini + giri programmati</small>
+</header>
+
+<div class="wrap">
+  <div class="card">
+    <h2 id="formTitle">Nuova missione</h2>
+    <div class="row">
+      <div><label>Data</label><input id="data" type="date"></div>
+      <div><label>Tratta / Zona / Fornitore</label><input id="tratta" placeholder="V1, E5, FAMI..."></div>
+      <div><label>Autista</label><select id="autista"><option>Gamberini</option><option>Remo</option><option>Maini</option><option>Gruppo</option></select></div>
+      <div><label>Volume m³</label><input id="volume" type="number" step="0.1" placeholder="0"></div>
+      <div><label>Tipo missione</label><select id="tipo"><option>Consegna</option><option>Ritiro fornitore</option><option>Ritiro cliente</option><option>Corriere</option></select></div>
+      <div><label>N. Ordini</label><input id="ordini" type="number" min="0" placeholder="0"></div>
+      <div><label>Link PDF</label><input id="linkPdf" placeholder="Incolla link SharePoint/Teams"></div>
+      <div><label>Note</label><input id="note" placeholder="Note"></div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <div class="wide3"><label>Elenco ordini del giro</label><textarea id="ordiniLista" placeholder="Esempio:
+OV2026-1234 - Rossi - Bologna
+OV2026-1235 - Bianchi - Modena"></textarea></div>
+      <div class="wide2"><label>Nota per commerciale</label><textarea id="noteCommerciale" placeholder="Informazioni visibili a commerciale/colleghi"></textarea></div>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+      <button id="btnAdd" class="primary">+ Aggiungi</button>
+      <button id="btnUpdate" class="success hidden">Aggiorna giro</button>
+      <button id="btnCancel" class="secondary hidden">Annulla modifica</button>
+    </div>
+    <div class="legend">
+      <span><i class="dot" style="background:#22c55e"></i>0-14,9 m³</span>
+      <span><i class="dot" style="background:#f59e0b"></i>15-19,9 m³</span>
+      <span><i class="dot" style="background:#f97316"></i>20-23,9 m³</span>
+      <span><i class="dot" style="background:#ef4444"></i>≥24 m³ pieno</span>
+      <span><i class="dot" style="background:#7c3aed"></i>Ritiri</span>
+    </div>
+    <div id="status" class="statusbar"></div>
+  </div>
+
+  <div class="card">
+    <h3>Crea giri programmati</h3>
+    <div class="row-program">
+      <div><label>Data inizio</label><input id="progInizio" type="date"></div>
+      <div><label>Data fine</label><input id="progFine" type="date"></div>
+      <div><label>Giorni</label><div class="checkgrid" id="progDays">
+        <label><input type="checkbox" value="1"> Lun</label>
+        <label><input type="checkbox" value="2"> Mar</label>
+        <label><input type="checkbox" value="3"> Mer</label>
+        <label><input type="checkbox" value="4"> Gio</label>
+        <label><input type="checkbox" value="5"> Ven</label>
+        <label><input type="checkbox" value="6"> Sab</label>
+      </div></div>
+      <div><label>Frequenza</label><select id="progFreq">
+        <option value="weekly">Ogni settimana</option>
+        <option value="biweekly">Ogni 2 settimane</option>
+        <option value="triweekly">Ogni 3 settimane</option>
+        <option value="fourweekly">Ogni 4 settimane</option>
+        <option value="first">Primo del mese</option>
+        <option value="second">Secondo del mese</option>
+        <option value="third">Terzo del mese</option>
+        <option value="fourth">Quarto del mese</option>
+        <option value="last">Ultimo del mese</option>
+        <option value="firstThird">Primo e Terzo del mese</option>
+        <option value="secondFourth">Secondo e Quarto del mese</option>
+      </select></div>
+      <div><label>Tratta/Zona</label><input id="progTratta" placeholder="V1"></div>
+      <div><label>Autista</label><select id="progAutista"><option>Gamberini</option><option>Remo</option><option>Maini</option><option>Gruppo</option></select></div>
+      <div><label>Tipo</label><select id="progTipo"><option>Consegna</option><option>Ritiro fornitore</option><option>Ritiro cliente</option><option>Corriere</option></select></div>
+      <div><label>Volume m³</label><input id="progVolume" type="number" step="0.1" value="0"></div>
+      <div><label>N. Ordini</label><input id="progOrdini" type="number" value="0"></div>
+      <div><button class="warning" id="btnProgramma">Crea programmati</button></div>
+    </div>
+    <div class="statusbar">Esempio: seleziona Mercoledì + frequenza "Primo e Terzo del mese" per creare il giro ogni primo e terzo mercoledì.</div>
+  </div>
+
+  <div class="card">
+    <div class="toolbar">
+      <div class="leftBtns">
+        <button class="primary" id="prev">←</button>
+        <button class="primary" id="today">Oggi</button>
+        <button class="primary" id="next">→</button>
+        <span class="monthTitle" id="monthTitle"></span>
+      </div>
+      <div class="filters">
+        <select id="filterAutista"><option value="">Tutti gli autisti</option><option>Gamberini</option><option>Remo</option><option>Maini</option><option>Gruppo</option></select>
+        <select id="filterTipo"><option value="">Tutti i tipi</option><option>Consegna</option><option>Ritiro fornitore</option><option>Ritiro cliente</option><option>Corriere</option></select>
+      </div>
+    </div>
+    <div class="calendar" id="dows"></div>
+    <div class="calendar" id="calendar"></div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, addDoc, deleteDoc, doc, updateDoc, onSnapshot, query } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBNgpYA2d7HToJppcZ6yLDLSt3A75c9Ogk",
+  authDomain: "calendario-spedizioni.firebaseapp.com",
+  projectId: "calendario-spedizioni",
+  storageBucket: "calendario-spedizioni.firebasestorage.app",
+  messagingSenderId: "214380369240",
+  appId: "1:214380369240:web:85551d1aa272d9f736412d"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const col = collection(db, "spedizioni");
+
+let current = new Date();
+let missions = [];
+let editingId = null;
+
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2,'0');
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parseISO = s => { const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); };
+
+$('data').value = iso(new Date());
+$('progInizio').value = iso(new Date());
+document.querySelector('#progDays input[value="1"]').checked = true;
+let fine = new Date(); fine.setMonth(fine.getMonth()+6); $('progFine').value = iso(fine);
+
+function status(msg){ $('status').textContent = msg || ''; }
+
+function cls(m){
+  if((m.tipo||'').toLowerCase().includes('ritiro')) return 'purple';
+  const v = Number(m.volume||0);
+  if(v >= 24) return 'red';
+  if(v >= 20) return 'orange';
+  if(v >= 15) return 'yellow';
+  return 'green';
+}
+
+function pdfLabel(m){
+  if(m.linkPdf) return `<a href="${safeAttr(m.linkPdf)}" target="_blank" rel="noopener">📄 Apri PDF</a>`;
+  if(m.pdfNome) return `📄 ${escapeHtml(m.pdfNome)}`;
+  return '';
+}
+
+function escapeHtml(value){
+  return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
+}
+function safeAttr(value){
+  return escapeHtml(value);
+}
+function renderOrderList(text){
+  const rows = String(text || '').split(/\n|;/).map(x=>x.trim()).filter(Boolean);
+  if(!rows.length) return '';
+  return `<ul class="orderlist">${rows.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul>`;
+}
+
+function render(){
+  const dows = ['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
+  $('dows').innerHTML = dows.map(d=>`<div class="dow">${d}</div>`).join('');
+  const y = current.getFullYear(), m = current.getMonth();
+  $('monthTitle').textContent = current.toLocaleDateString('it-IT',{month:'long',year:'numeric'}).toUpperCase();
+
+  const first = new Date(y,m,1);
+  const start = new Date(first);
+  const day = (first.getDay()+6)%7;
+  start.setDate(first.getDate()-day);
+
+  const fa = $('filterAutista').value, ft = $('filterTipo').value;
+  let html='';
+  for(let i=0;i<42;i++){
+    const date = new Date(start); date.setDate(start.getDate()+i);
+    const key = iso(date);
+    const muted = date.getMonth() !== m ? 'muted' : '';
+    const evs = missions.filter(x => x.data===key && (!fa || x.autista===fa) && (!ft || x.tipo===ft));
+    html += `<div class="day ${muted}"><div class="daynum">${date.getDate()}</div>`;
+    evs.forEach(ev=>{
+      const pieno = Number(ev.volume||0) >= 24 ? ' - PIENO' : '';
+      const pdf = pdfLabel(ev);
+      const listaOrdini = renderOrderList(ev.ordiniLista);
+      html += `<div class="event ${cls(ev)}">
+        <b>${escapeHtml(ev.tratta || '-')}</b> - ${escapeHtml(ev.autista || '-')}<br>
+        <span class="mini">${escapeHtml(ev.tipo || '')} · ${ev.volume || 0} m³${pieno} · Ordini: ${ev.ordini || 0}</span>
+        ${pdf ? `<br><span class="mini">${pdf}</span>` : ''}
+        ${listaOrdini}
+        ${ev.noteCommerciale ? `<br><span class="mini">👁️ Commerciale: ${escapeHtml(ev.noteCommerciale)}</span>` : ''}
+        ${ev.note ? `<br><span class="mini">📝 ${escapeHtml(ev.note)}</span>` : ''}
+        <div class="event-actions">
+          <button class="secondary" onclick="window.editMission('${ev.id}')">Modifica</button>
+          <button class="danger" onclick="window.deleteMission('${ev.id}')">X</button>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+  $('calendar').innerHTML = html;
+}
+
+function formData(){
+  return {
+    data: $('data').value,
+    tratta: $('tratta').value.trim(),
+    autista: $('autista').value,
+    volume: Number($('volume').value || 0),
+    tipo: $('tipo').value,
+    ordini: Number($('ordini').value || 0),
+    linkPdf: $('linkPdf').value.trim(),
+    ordiniLista: $('ordiniLista').value.trim(),
+    noteCommerciale: $('noteCommerciale').value.trim(),
+    note: $('note').value.trim()
+  };
+}
+
+function clearForm(){
+  editingId = null;
+  $('formTitle').textContent='Nuova missione';
+  $('btnAdd').classList.remove('hidden');
+  $('btnUpdate').classList.add('hidden');
+  $('btnCancel').classList.add('hidden');
+  ['tratta','volume','ordini','note','linkPdf','ordiniLista','noteCommerciale'].forEach(id=>$(id).value='');
+  status('');
+}
+
+$('btnAdd').onclick = async () => {
+  const data = formData();
+  if(!data.data || !data.tratta){ status('Inserisci almeno Data e Tratta/Zona.'); return; }
+  await addDoc(col, data);
+  clearForm();
+  status('Missione aggiunta.');
+};
+
+$('btnUpdate').onclick = async () => {
+  if(!editingId) return;
+  const data = formData();
+  await updateDoc(doc(db,'spedizioni',editingId), data);
+  clearForm();
+  status('Giro aggiornato.');
+};
+
+$('btnCancel').onclick = clearForm;
+
+window.editMission = id => {
+  const m = missions.find(x=>x.id===id);
+  if(!m) return;
+  editingId = id;
+  $('formTitle').textContent='Modifica giro';
+  $('data').value=m.data||'';
+  $('tratta').value=m.tratta||'';
+  $('autista').value=m.autista||'Gamberini';
+  $('volume').value=m.volume||0;
+  $('tipo').value=m.tipo||'Consegna';
+  $('ordini').value=m.ordini||0;
+  $('linkPdf').value=m.linkPdf||'';
+  $('ordiniLista').value=m.ordiniLista||'';
+  $('noteCommerciale').value=m.noteCommerciale||'';
+  $('note').value=m.note||'';
+  $('btnAdd').classList.add('hidden');
+  $('btnUpdate').classList.remove('hidden');
+  $('btnCancel').classList.remove('hidden');
+  window.scrollTo({top:0,behavior:'smooth'});
+  status(m.linkPdf ? 'PDF collegato: il link rimane modificabile nel campo Link PDF.' : '');
+};
+
+window.deleteMission = async id => {
+  if(confirm('Eliminare questo giro?')) await deleteDoc(doc(db,'spedizioni',id));
+};
+
+function selectedProgDays(){
+  return Array.from(document.querySelectorAll('#progDays input:checked')).map(x=>Number(x.value));
+}
+
+function weekOfMonth(date){
+  return Math.floor((date.getDate()-1)/7)+1;
+}
+
+function isLastWeekdayOfMonth(date){
+  const next = new Date(date);
+  next.setDate(date.getDate()+7);
+  return next.getMonth() !== date.getMonth();
+}
+
+function monthMatch(date, freq){
+  const wom = weekOfMonth(date);
+  if(freq === 'first') return wom === 1;
+  if(freq === 'second') return wom === 2;
+  if(freq === 'third') return wom === 3;
+  if(freq === 'fourth') return wom === 4;
+  if(freq === 'last') return isLastWeekdayOfMonth(date);
+  if(freq === 'firstThird') return wom === 1 || wom === 3;
+  if(freq === 'secondFourth') return wom === 2 || wom === 4;
+  return false;
+}
+
+function datesProgrammed(){
+  const start = parseISO($('progInizio').value);
+  const end = parseISO($('progFine').value);
+  const freq = $('progFreq').value;
+  const days = selectedProgDays();
+  const dates = [];
+  if(isNaN(start) || isNaN(end) || end < start || !days.length) return dates;
+
+  const firstMonday = new Date(start);
+  firstMonday.setDate(start.getDate() - ((start.getDay()+6)%7));
+
+  for(let d=new Date(start); d<=end; d.setDate(d.getDate()+1)){
+    const dow = d.getDay() === 0 ? 7 : d.getDay();
+    if(!days.includes(dow)) continue;
+
+    if(['weekly','biweekly','triweekly','fourweekly'].includes(freq)){
+      const thisMonday = new Date(d);
+      thisMonday.setDate(d.getDate() - ((d.getDay()+6)%7));
+      const diffDays = Math.round((thisMonday - firstMonday) / 86400000);
+      const diffWeeks = Math.floor(diffDays / 7);
+      const every = freq === 'weekly' ? 1 : freq === 'biweekly' ? 2 : freq === 'triweekly' ? 3 : 4;
+      if(diffWeeks % every === 0) dates.push(iso(new Date(d)));
+    } else {
+      if(monthMatch(d, freq)) dates.push(iso(new Date(d)));
+    }
+  }
+  return dates;
+}
+
+$('btnProgramma').onclick = async () => {
+  const dates = datesProgrammed();
+  const tratta = $('progTratta').value.trim();
+  if(!tratta || !dates.length){ status('Controlla tratta, date e almeno un giorno della settimana.'); return; }
+  if(!confirm(`Creo ${dates.length} giri programmati?`)) return;
+
+  for(const data of dates){
+    await addDoc(col, {
+      data,
+      tratta,
+      autista: $('progAutista').value,
+      tipo: $('progTipo').value,
+      volume: Number($('progVolume').value||0),
+      ordini: Number($('progOrdini').value||0),
+      linkPdf:'',
+      ordiniLista:'',
+      noteCommerciale:'',
+      note:`Giro programmato - ${$('progFreq').selectedOptions[0].text}`
+    });
+  }
+  status(`${dates.length} giri programmati creati.`);
+};
+
+$('prev').onclick = () => { current.setMonth(current.getMonth()-1); render(); };
+$('next').onclick = () => { current.setMonth(current.getMonth()+1); render(); };
+$('today').onclick = () => { current = new Date(); render(); };
+$('filterAutista').onchange = render;
+$('filterTipo').onchange = render;
+
+onSnapshot(query(col), snap => {
+  missions = snap.docs.map(d=>({id:d.id,...d.data()}));
+  render();
+});
+</script>
+</body>
+</html>
